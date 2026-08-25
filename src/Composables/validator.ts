@@ -6,6 +6,7 @@ import type { NestedPath } from "../Utils/types.js";
 interface ValidatorOptions {
 	inputErrorClass: string|null,
 	inputRequiredClass: string|null,
+	errorMessageClass: string|null,
 }
 
 interface ValidatorShared<TE extends string = string> {
@@ -46,6 +47,7 @@ export const useValidator = <T extends object = object, TE extends string = stri
 			options: {
 				inputErrorClass: "border-red-500 focus:border-red-500 bg-red-50 focus:bg-red-50 dark:bg-red-900/20",
 				inputRequiredClass: null,
+				errorMessageClass: "text-red-500 text-xs mt-1",
 				...options,
 			},
 			errorMessageElements: {},
@@ -96,6 +98,11 @@ export class Validator<T extends object = object, TE extends string = string> {
 	 * Automatically applies `inputErrorClass` when the field has an error.
 	 */
 	public inputBind = reactive<{ class: Record<string, boolean> }>({ class: {} });
+
+	/** Default CSS class for `ErrorMessage`, unless overridden by its own `errorMessageClass` prop. */
+	public get errorMessageClass(): string|null {
+		return this.shared.options.errorMessageClass;
+	}
 
 	private errorMessageElements: Record<string, HTMLElement> = {};
 

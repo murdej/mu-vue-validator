@@ -4,6 +4,7 @@ import { UseValidator } from "../../Composables/validator.js";
 
 interface Props {
   validator: UseValidator,
+  errorMessageClass?: string,
 }
 const props = defineProps<Props>();
 const element = ref();
@@ -11,7 +12,7 @@ onMounted(() => props.validator.setErrorMessage(element.value));
 </script>
 
 <template>
-  <span v-if="props.validator.hasError.value" class="text-red-500 text-xs mt-1" ref="element">
+  <span v-if="props.validator.hasError.value" :class="props.errorMessageClass ?? props.validator.errorMessageClass" ref="element">
     {{ props.validator.errorMessage }}
   </span>
 </template>
