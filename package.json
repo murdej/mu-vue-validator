@@ -8,6 +8,7 @@
     "watch": "pnpm run clean && pnpm run copy:components && tsc -w -p tsconfig.json --outDir dist",
     "clean": "rm -rf dist",
     "copy:components": "cp -r src/Components dist/Components",
+    "prepare": "pnpm run build",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "keywords": [],

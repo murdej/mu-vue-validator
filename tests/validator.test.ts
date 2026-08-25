@@ -51,6 +51,35 @@ describe('useValidator', () => {
         expect(vali.allIsValid.value).toBe(false);
     });
 
+    it('markSubmitted() re-checks a field whose when() condition depends on a sibling field that changed', async () => {
+        const conditionalSchema = object({
+            hasCompany: string(),
+            companyName: string().when('hasCompany', {
+                is: 'true',
+                then: (s) => s.required(),
+                otherwise: (s) => s,
+            }),
+        });
+        const data = ref({ hasCompany: '', companyName: '' });
+        const vali = useValidator(data, conditionalSchema);
+        const companyNameField = vali.for('companyName');
+        await nextTick();
+
+        // Not required yet — hasCompany is still falsy, companyName was never touched directly.
+        vali.markSubmitted();
+        await nextTick();
+        expect(companyNameField.hasError.value).toBe(false);
+
+        // Only the SIBLING field changes — companyName's own watch never fires on its own.
+        data.value.hasCompany = 'true';
+        await nextTick();
+
+        vali.markSubmitted();
+        await nextTick();
+        expect(companyNameField.hasError.value).toBe(true);
+        expect(vali.allIsValid.value).toBe(false);
+    });
+
     it('supports extra (non-yup) errors via extraErrors', async () => {
         const data = ref({ email: 'user@example.com', nickname: '' });
         const vali = useValidator<{ email: string; nickname: string }, 'serverError'>(data, schema);

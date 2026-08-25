@@ -2,6 +2,7 @@ import { type ObjectSchema, type SchemaDescription, reach, ValidationError } fro
 import { computed, type ComputedRef, reactive, type Ref, ref, unref, watch } from "vue";
 import type { NestedPath } from "../Utils/types.js";
 
+
 interface ValidatorOptions {
 	inputErrorClass: string|null,
 	inputRequiredClass: string|null,
@@ -227,10 +228,19 @@ export class Validator<T extends object = object, TE extends string = string> {
 	/**
 	 * Marks the whole validator tree as submitted — from this point on, all errors are shown
 	 * regardless of whether the individual fields were touched. Call on a submit attempt.
+	 *
+	 * Also force-revalidates every field validator created so far. Each field's own watch (in the
+	 * constructor) only re-runs runValidation() when THAT field's own value changes, so a yup
+	 * `when()` rule keyed off a sibling field (e.g. "field B required only when field A is true")
+	 * goes stale the moment the sibling changes without the dependent field itself changing —
+	 * allIsValid would otherwise report a stale (often wrongly-valid) result right when
+	 * markSubmitted() is used to gate a submit.
 	 */
 	public markSubmitted(): void
 	{
 		this.shared.submitted.value = true;
+		this.runValidation();
+		for (const validator of Object.values(this.shared.store)) validator?.runValidation();
 	}
 
 	/**
